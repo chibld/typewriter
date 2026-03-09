@@ -1,27 +1,47 @@
-import { faker } from "@faker-js/faker";
 import RestartButton from "./components/RestartButton";
 import Results from "./components/Results";
 import UserTypings from "./components/UserTypings";
-
-const words = faker.word.words(10);
+import useEngine from "./hooks/useEngine";
+import { calculateAccuracyPercentage } from "./utils/helpers";
 
 function App() {
+  const { state, words, timeLeft, typed, errors, totalTyped, restart } =
+    useEngine();
+
   return (
     <>
-      <CountdownTimer timeLeft={30} />
-      <div className="relative max-w-xl mt-3 text-3xl leading-relaxed break-all">
+      <CountdownTimer timeLeft={timeLeft} />
+      <WordsContainer>
         <GeneratedWords words={words} />
-        <UserTypings className="absolute inset-0" userInput={words} />
-      </div>
+        <UserTypings
+          className="absolute inset-0"
+          words={words}
+          userInput={typed}
+        />
+      </WordsContainer>
 
       <RestartButton
         className={"mx-auto mt-10 text-slate-500"}
-        onRestart={() => null}
+        onRestart={restart}
       />
-      <Results className="mt-10" errors={10} accuracy={100} total={200} />
+      <Results
+        state={state}
+        className="mt-10"
+        errors={errors}
+        accuracy={calculateAccuracyPercentage(errors, totalTyped)}
+        total={totalTyped}
+      />
     </>
   );
 }
+
+const WordsContainer = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="relative max-w-xl mt-3 text-3xl leading-relaxed break-all">
+      {children}
+    </div>
+  );
+};
 
 const GeneratedWords = ({ words }: { words: string }) => {
   return <div className="text-slate-500">{words}</div>;
